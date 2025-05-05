@@ -14,6 +14,27 @@ features:
   - title: 产品互联
     details: 所有产品页面自动互相链接
 ---
+---
+
+## 🧩 当前产品列表
+
+<div id="product-list" style="display: flex; flex-wrap: wrap; gap: 16px;"></div>
+
+<script>
+fetch('/products.json')
+  .then(res => res.json())
+  .then(products => {
+    const container = document.getElementById('product-list')
+    container.innerHTML = products.map(p => `
+      <div style="border: 1px solid #ccc; padding: 1rem; width: 240px; border-radius: 8px;">
+        <img src="${p.icon}" alt="${p.name}" style="height: 64px;" />
+        <h3>${p.name}</h3>
+        <p>${p.description}</p>
+        <a href="${p.link}" target="_blank">访问产品</a>
+      </div>
+    `).join('')
+  })
+</script>
 
 ### 🧩 当前产品（自动生成区域）
 
