@@ -1,0 +1,16 @@
+[
+  {
+    "slug": "ai-trader",
+    "name": "AI 智能交易",
+    "description": "基于策略执行的自动秒合约平台",
+    "icon": "https://via.placeholder.com/80",
+    "link": "https://yourusername.github.io/ai-trader/"
+  },
+  {
+    "slug": "quant-dashboard",
+    "name": "量化数据看板",
+    "description": "实时展示资产分布与策略盈亏",
+    "icon": "https://via.placeholder.com/80",
+    "link": "https://yourusername.github.io/quant-dashboard/"
+  }
+]
