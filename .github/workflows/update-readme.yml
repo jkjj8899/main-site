@@ -1,0 +1,48 @@
+name: 更新展示仓库的 README 产品列表
+
+on:
+  push:
+    paths:
+      - 'products.json'
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 克隆展示仓库 product-site
+        uses: actions/checkout@v3
+        with:
+          repository: jkjj8899/product-site
+          token: ${{ secrets.GH_PAT }}
+
+      - name: 安装依赖
+        run: npm install axios
+
+      - name: 自动更新 README
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const products = JSON.parse(fs.readFileSync('../main-site/products.json', 'utf-8'));
+
+          const tableRows = products.map(p => `| ![${p.name}](${p.icon}) | **${p.name}** | ${p.description} | [访问页面](${p.link}) |`).join('\n');
+
+          const readme = fs.readFileSync('README.md', 'utf-8');
+          const updated = readme.replace(
+            /<!-- PRODUCT_LIST_START -->([\s\S]*?)<!-- PRODUCT_LIST_END -->/,
+            `<!-- PRODUCT_LIST_START -->\n${tableRows}\n<!-- PRODUCT_LIST_END -->`
+          );
+
+          fs.writeFileSync('README.md', updated);
+
+          console.log('✅ README.md 已更新产品表格');
+          EOF
+
+      - name: 提交变更
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add README.md
+          git commit -m "自动插入产品列表" || echo "无变化"
+          git push
