@@ -52,7 +52,7 @@ jobs:
           async function createRepo(slug, description) {
             await axios.post(`https://api.github.com/user/repos`, {
               name: slug,
-              private: true,
+              private: false,
               description
             }, { headers });
           }
