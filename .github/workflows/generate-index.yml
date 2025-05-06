@@ -31,8 +31,11 @@ jobs:
           GH_USERNAME: jkjj8899
         run: node build.js
 
-      - name: 提交 index.html
+      - name: 提交 index.html 到 product-site 仓库
         run: |
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/product-site.git temp-site
+          cp index.html temp-site/index.html
+          cd temp-site
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add index.html
