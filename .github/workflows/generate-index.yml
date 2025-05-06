@@ -7,11 +7,8 @@ jobs:
   generate-page:
     runs-on: ubuntu-latest
     steps:
-      - name: 克隆展示仓库 product-site
+      - name: 克隆当前仓库
         uses: actions/checkout@v3
-        with:
-          repository: jkjj8899/product-site
-          token: ${{ secrets.GH_PAT }}
 
       - name: 安装依赖
         run: npm install axios
