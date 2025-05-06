@@ -12,5 +12,12 @@
     "description": "实时展示资产分布与策略盈亏",
     "icon": "https://via.placeholder.com/80",
     "link": "https://yourusername.github.io/quant-dashboard/"
+  },
+    {
+    "slug": "test-bot",
+    "name": "测试机器人",
+    "description": "用于测试自动创建仓库的机器人项目",
+    "icon": "https://via.placeholder.com/64",
+    "link": "https://jkjj8899.github.io/test-bot/"
   }
 ]
