@@ -1,0 +1,81 @@
+name: 自动创建子仓库
+
+on:
+  push:
+    paths:
+      - 'products.json'
+    branches:
+      - main
+
+jobs:
+  create-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 克隆下一仓库
+        uses: actions/checkout@v3
+
+      - name: 配置 Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 安装依赖
+        run: npm install axios
+
+      - name: 执行自动创建脚本
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_USERNAME: jkjj8899   # 换成你的账号
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const axios = require('axios');
+
+          const GH_TOKEN = process.env.GH_TOKEN;
+          const USERNAME = process.env.GH_USERNAME;
+          const headers = {
+            Authorization: `token ${GH_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json'
+          };
+
+          const products = JSON.parse(fs.readFileSync('products.json', 'utf-8'));
+
+          async function repoExists(repo) {
+            try {
+              await axios.get(`https://api.github.com/repos/${USERNAME}/${repo}`, { headers });
+              return true;
+            } catch (err) {
+              return false;
+            }
+          }
+
+          async function createRepo(slug, description) {
+            await axios.post(`https://api.github.com/user/repos`, {
+              name: slug,
+              private: true,
+              description
+            }, { headers });
+          }
+
+          async function initProductJson(slug, product) {
+            const content = Buffer.from(JSON.stringify(product, null, 2)).toString('base64');
+            await axios.put(`https://api.github.com/repos/${USERNAME}/${slug}/contents/.product.json`, {
+              message: "init product json",
+              content,
+              branch: "main"
+            }, { headers });
+          }
+
+          (async () => {
+            for (const p of products) {
+              const exists = await repoExists(p.slug);
+              if (!exists) {
+                console.log(`Creating repo: ${p.slug}`);
+                await createRepo(p.slug, p.description);
+                await initProductJson(p.slug, p);
+              } else {
+                console.log(`Skipped existing repo: ${p.slug}`);
+              }
+            }
+          })();
+          EOF
