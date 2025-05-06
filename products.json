@@ -5,5 +5,12 @@
     "description": "用于测试自动创建仓库的机器人项目",
     "icon": "https://via.placeholder.com/64",
     "link": "https://jkjj8899.github.io/test-bot/"
+  },
+        {
+    "slug": "test-bot1",
+    "name": "测试机器人",
+    "description": "这是一个测试项目",
+    "icon": "https://via.placeholder.com/64",
+    "link": "https://jkjj8899.github.io/test-bot1/"
   }
 ]
