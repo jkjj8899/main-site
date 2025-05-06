@@ -12,5 +12,12 @@
     "description": "这是一个测试项目",
     "icon": "https://via.placeholder.com/64",
     "link": "https://jkjj8899.github.io/test-bot1/"
+  },
+        {
+    "slug": "test-bot2",
+    "name": "测试机器人",
+    "description": "测试是否到总仓库",
+    "icon": "https://via.placeholder.com/64",
+    "link": "https://jkjj8899.github.io/test-bot2/"
   }
 ]
