@@ -1,0 +1,84 @@
+name: 自动生成产品展示页 index.html
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-page:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 克隆展示仓库 product-site
+        uses: actions/checkout@v3
+        with:
+          repository: jkjj8899/product-site
+          token: ${{ secrets.GH_PAT }}
+
+      - name: 安装依赖
+        run: npm install axios
+
+      - name: 生成 index.html 页面
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_USERNAME: jkjj8899
+        run: |
+          node <<'EOF'
+          const axios = require('axios');
+          const fs = require('fs');
+
+          const GH_TOKEN = process.env.GH_TOKEN;
+          const USERNAME = process.env.GH_USERNAME;
+          const SOURCE_REPO = "main-site";
+
+          const headers = {
+            Authorization: `token ${GH_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json'
+          };
+
+          (async () => {
+            const res = await axios.get(`https://api.github.com/repos/${USERNAME}/${SOURCE_REPO}/contents/products.json`, { headers });
+            const products = JSON.parse(Buffer.from(res.data.content, 'base64').toString('utf-8'));
+
+            const html = `<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="七点科技 - 产品展示页，AI、Web3、交易系统等合集" />
+  <title>七点科技产品目录</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f9f9f9; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); padding: 1rem; text-align: center; }
+    .card img { width: 48px; height: 48px; }
+    .card h3 { margin: 0.5rem 0; font-size: 1.1rem; }
+    .card p { color: #666; font-size: 0.9rem; }
+    .card a { display: inline-block; margin-top: 0.5rem; color: #007bff; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>七点科技 · 产品展示</h1>
+  <div class="grid">
+    ${products.map(p => `
+    <div class="card">
+      <img src="${p.icon}" alt="${p.name}" />
+      <h3>${p.name}</h3>
+      <p>${p.description}</p>
+      <a href="${p.link}" target="_blank">访问产品</a>
+    </div>
+    `).join('')}
+  </div>
+</body>
+</html>`;
+
+            fs.writeFileSync("index.html", html);
+            console.log("✅ index.html 页面已生成");
+          })();
+          EOF
+
+      - name: 提交 index.html
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add index.html
+          git commit -m "自动生成产品展示页面" || echo "无变化"
+          git push
