@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>七点科技产品控制台</title>
+  <style>
+    body { font-family: sans-serif; background: #f2f2f2; padding: 2rem; max-width: 700px; margin: auto; }
+    h1 { text-align: center; color: #003366; }
+    form, .danger-zone { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+    button { margin-top: 1.5rem; padding: 0.75rem 1.5rem; font-size: 1rem; background: #003366; color: white; border: none; cursor: pointer; border-radius: 5px; }
+    .danger-zone button { background: darkred; }
+    #unauthorized { display: none; text-align: center; color: red; margin-top: 5rem; }
+  </style>
+</head>
+<body>
+  <div id="unauthorized">
+    <h1>🔒 未授权访问</h1>
+    <p>请输入正确密码以访问该页面。</p>
+  </div>
+
+  <div id="app" style="display:none">
+    <h1>七点科技产品控制台</h1>
+    <form id="add-form">
+      <h2>添加产品</h2>
+      <label>GitHub Token</label>
+      <input type="password" id="token" placeholder="你的 GitHub Token">
+
+      <label>产品名称</label>
+      <input type="text" id="name" required>
+
+      <label>产品简介</label>
+      <input type="text" id="description" required>
+
+      <label>图标地址</label>
+      <input type="url" id="icon" required>
+
+      <label>产品链接</label>
+      <input type="url" id="link" required>
+
+      <button type="submit">添加产品</button>
+    </form>
+
+    <div class="danger-zone">
+      <h2>删除产品</h2>
+      <label>产品名称（用于从 JSON 中匹配）</label>
+      <input type="text" id="delete-name">
+      <button onclick="deleteProduct()">删除产品并删除仓库</button>
+    </div>
+  </div>
+
+  <script>
+    const PASSWORD = "qidian2025";
+    const username = 'jkjj8899';
+    const repo = 'main-site';
+    let productsCache = [];
+
+    function slugify(name) {
+      return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    function checkPassword() {
+      const input = prompt("请输入访问密码：");
+      if (input === PASSWORD) {
+        document.getElementById('app').style.display = 'block';
+      } else {
+        document.getElementById('unauthorized').style.display = 'block';
+      }
+    }
+
+    checkPassword();
+
+    async function fetchJSON(path, token) {
+      const res = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
+        headers: { Authorization: `token ${token}` }
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      const content = atob(data.content);
+      return { content: JSON.parse(content), sha: data.sha };
+    }
+
+    document.getElementById('add-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = document.getElementById('token').value.trim();
+      const product = {
+        name: document.getElementById('name').value,
+        description: document.getElementById('description').value,
+        icon: document.getElementById('icon').value,
+        link: document.getElementById('link').value,
+        slug: slugify(document.getElementById('name').value)
+      };
+
+      try {
+        const { content: products, sha } = await fetchJSON('products.json', token);
+        productsCache = products;
+
+        if (products.find(p => p.slug === product.slug)) {
+          return alert('❌ 已存在相同 slug 的产品，请更换名称');
+        }
+
+        products.push(product);
+        const updated = btoa(JSON.stringify(products, null, 2));
+
+        await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `添加产品：${product.name}`,
+            content: updated,
+            sha
+          })
+        });
+
+        alert('✅ 添加成功');
+      } catch (err) {
+        alert('❌ 添加失败：' + err.message);
+      }
+    });
+
+    document.getElementById('delete-name').addEventListener('input', async () => {
+      const name = document.getElementById('delete-name').value.trim();
+      const token = document.getElementById('token').value.trim();
+      if (!name || !token) return;
+
+      try {
+        if (productsCache.length === 0) {
+          const { content } = await fetchJSON('products.json', token);
+          productsCache = content;
+        }
+
+        const p = productsCache.find(p => p.name === name);
+        const preview = document.getElementById('product-preview') || document.createElement('div');
+        preview.id = 'product-preview';
+        preview.style.marginTop = '1rem';
+
+        if (p) {
+          preview.innerHTML = `
+            <div style="background:#fff;padding:1rem;border:1px solid #ccc;border-radius:8px;">
+              <img src="${p.icon}" style="height:40px;width:40px;vertical-align:middle" />
+              <strong style="margin-left:1rem;">${p.name}</strong><br>
+              <span>${p.description}</span><br>
+              <a href="${p.link}" target="_blank">访问页面</a>
+            </div>`;
+        } else {
+          preview.innerHTML = `<div style="color:gray;">未找到产品信息</div>`;
+        }
+
+        document.querySelector('.danger-zone').appendChild(preview);
+      } catch {}
+    });
+
+    async function deleteProduct() {
+      const name = document.getElementById('delete-name').value.trim();
+      const token = document.getElementById('token').value.trim();
+      if (!name || !token) return alert('请输入名称和 Token');
+
+      const confirmed = confirm(`⚠️ 确定要删除产品 "${name}" 及其仓库？此操作不可恢复！`);
+      if (!confirmed) return;
+
+      try {
+        const { content: products, sha } = await fetchJSON('products.json', token);
+        const product = products.find(p => p.name === name);
+        if (!product) return alert('❌ 未找到该产品');
+
+        const updatedList = products.filter(p => p.name !== name);
+        const updated = btoa(JSON.stringify(updatedList, null, 2));
+
+        await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `删除产品：${name}`,
+            content: updated,
+            sha
+          })
+        });
+
+        const repoSlug = product.slug || slugify(name);
+        const deleteRes = await fetch(`https://api.github.com/repos/${username}/${repoSlug}`, {
+          method: 'DELETE',
+          headers: { Authorization: `token ${token}` }
+        });
+
+        if (deleteRes.status === 204) {
+          alert('✅ 删除成功，包括对应仓库');
+        } else {
+          alert(`⚠️ 产品已删除，但仓库删除失败（状态码 ${deleteRes.status}）`);
+        }
+
+        document.getElementById('product-preview')?.remove();
+      } catch (err) {
+        alert('❌ 删除失败：' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
