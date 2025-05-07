@@ -1,23 +1,30 @@
 [
-    {
+  {
     "slug": "test-bot",
-    "name": "测试机器人",
-    "description": "用于测试自动创建仓库的机器人项目",
+    "name": "æµè¯æºå¨äºº",
+    "description": "ç¨äºæµè¯èªå¨åå»ºä»åºçæºå¨äººé¡¹ç®",
     "icon": "https://via.placeholder.com/64",
     "link": "https://jkjj8899.github.io/test-bot/"
   },
-        {
+  {
     "slug": "test-bot1",
-    "name": "测试机器人",
-    "description": "这是一个测试项目",
+    "name": "æµè¯æºå¨äºº",
+    "description": "è¿æ¯ä¸ä¸ªæµè¯é¡¹ç®",
     "icon": "https://via.placeholder.com/64",
     "link": "https://jkjj8899.github.io/test-bot1/"
   },
-        {
+  {
     "slug": "test-bot2",
-    "name": "测试机器人",
-    "description": "测试是否到总仓库",
+    "name": "æµè¯æºå¨äºº",
+    "description": "æµè¯æ¯å¦å°æ»ä»åº",
     "icon": "https://via.placeholder.com/64",
     "link": "https://jkjj8899.github.io/test-bot2/"
+  },
+  {
+    "name": "测试自动添加",
+    "description": "测试自动添加",
+    "icon": "https://www.com",
+    "link": "https://jkjj8899.github.io/test-bot2/",
+    "slug": ""
   }
 ]
