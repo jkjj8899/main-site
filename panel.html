@@ -61,6 +61,10 @@
       return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     }
 
+    function btoaUtf8(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
     function checkPassword() {
       const input = prompt("请输入访问密码：");
       if (input === PASSWORD) {
@@ -102,7 +106,7 @@
         }
 
         products.push(product);
-        const updated = btoa(JSON.stringify(products, null, 2));
+        const updated = btoaUtf8(JSON.stringify(products, null, 2));
 
         await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
           method: 'PUT',
@@ -123,38 +127,6 @@
       }
     });
 
-    document.getElementById('delete-name').addEventListener('input', async () => {
-      const name = document.getElementById('delete-name').value.trim();
-      const token = document.getElementById('token').value.trim();
-      if (!name || !token) return;
-
-      try {
-        if (productsCache.length === 0) {
-          const { content } = await fetchJSON('products.json', token);
-          productsCache = content;
-        }
-
-        const p = productsCache.find(p => p.name === name);
-        const preview = document.getElementById('product-preview') || document.createElement('div');
-        preview.id = 'product-preview';
-        preview.style.marginTop = '1rem';
-
-        if (p) {
-          preview.innerHTML = `
-            <div style="background:#fff;padding:1rem;border:1px solid #ccc;border-radius:8px;">
-              <img src="${p.icon}" style="height:40px;width:40px;vertical-align:middle" />
-              <strong style="margin-left:1rem;">${p.name}</strong><br>
-              <span>${p.description}</span><br>
-              <a href="${p.link}" target="_blank">访问页面</a>
-            </div>`;
-        } else {
-          preview.innerHTML = `<div style="color:gray;">未找到产品信息</div>`;
-        }
-
-        document.querySelector('.danger-zone').appendChild(preview);
-      } catch {}
-    });
-
     async function deleteProduct() {
       const name = document.getElementById('delete-name').value.trim();
       const token = document.getElementById('token').value.trim();
@@ -169,7 +141,7 @@
         if (!product) return alert('❌ 未找到该产品');
 
         const updatedList = products.filter(p => p.name !== name);
-        const updated = btoa(JSON.stringify(updatedList, null, 2));
+        const updated = btoaUtf8(JSON.stringify(updatedList, null, 2));
 
         await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
           method: 'PUT',
