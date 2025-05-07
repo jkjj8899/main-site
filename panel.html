@@ -37,8 +37,11 @@
       <label>图标地址</label>
       <input type="url" id="icon" required>
 
-      <label>产品链接</label>
-      <input type="url" id="link" required>
+      <label>仓库 Slug（可选，默认自动生成）</label>
+      <input type="text" id="slug" placeholder="如 test-bot">
+
+      <label>产品链接（自动填充）</label>
+      <input type="url" id="link" readonly>
 
       <button type="submit">添加产品</button>
     </form>
@@ -82,19 +85,29 @@
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      const content = atob(data.content);
+      const content = decodeURIComponent(escape(atob(data.content)));
       return { content: JSON.parse(content), sha: data.sha };
     }
+
+    document.getElementById('name').addEventListener('input', () => {
+      const name = document.getElementById('name').value.trim();
+      const slug = slugify(name);
+      document.getElementById('slug').value = slug;
+      document.getElementById('link').value = `https://${username}.github.io/${slug}/`;
+    });
 
     document.getElementById('add-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = document.getElementById('token').value.trim();
+      const slugInput = document.getElementById('slug').value.trim();
+      const slug = slugInput || slugify(document.getElementById('name').value);
+
       const product = {
         name: document.getElementById('name').value,
         description: document.getElementById('description').value,
         icon: document.getElementById('icon').value,
-        link: document.getElementById('link').value,
-        slug: slugify(document.getElementById('name').value)
+        slug: slug,
+        link: `https://${username}.github.io/${slug}/`
       };
 
       try {
@@ -102,10 +115,10 @@
         productsCache = products;
 
         if (products.find(p => p.slug === product.slug)) {
-          return alert('❌ 已存在相同 slug 的产品，请更换名称');
+          return alert('❌ 已存在相同 slug 的产品，请更换');
         }
 
-        products.push(product);
+        products.unshift(product);
         const updated = btoaUtf8(JSON.stringify(products, null, 2));
 
         await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
@@ -167,8 +180,6 @@
         } else {
           alert(`⚠️ 产品已删除，但仓库删除失败（状态码 ${deleteRes.status}）`);
         }
-
-        document.getElementById('product-preview')?.remove();
       } catch (err) {
         alert('❌ 删除失败：' + err.message);
       }
