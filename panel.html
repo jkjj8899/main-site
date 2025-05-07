@@ -34,8 +34,8 @@
       <label>产品简介</label>
       <input type="text" id="description" required>
 
-      <label>图标地址</label>
-      <input type="url" id="icon" required>
+      <label>上传封面图</label>
+      <input type="file" id="iconFile" accept="image/*" required>
 
       <label>仓库 Slug（可选，默认自动生成）</label>
       <input type="text" id="slug" placeholder="如 test-bot">
@@ -58,6 +58,7 @@
     const PASSWORD = "qidian2025";
     const username = 'jkjj8899';
     const repo = 'main-site';
+    const assetRepo = 'product-site';
     let productsCache = [];
 
     function slugify(name) {
@@ -96,21 +97,53 @@
       document.getElementById('link').value = `https://${username}.github.io/${slug}/`;
     });
 
+    async function uploadImage(file, slug, token) {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          const contentBase64 = reader.result.split(',')[1];
+          const path = `assets/${slug}.png`;
+
+          const res = await fetch(`https://api.github.com/repos/${username}/${assetRepo}/contents/${path}`, {
+            method: 'PUT',
+            headers: {
+              Authorization: `token ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `上传产品图标 ${slug}.png`,
+              content: contentBase64
+            })
+          });
+
+          if (!res.ok) return reject(await res.text());
+          resolve(`https://raw.githubusercontent.com/${username}/${assetRepo}/main/${path}`);
+        };
+        reader.onerror = () => reject("图片读取失败");
+        reader.readAsDataURL(file);
+      });
+    }
+
     document.getElementById('add-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = document.getElementById('token').value.trim();
       const slugInput = document.getElementById('slug').value.trim();
       const slug = slugInput || slugify(document.getElementById('name').value);
 
-      const product = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        icon: document.getElementById('icon').value,
-        slug: slug,
-        link: `https://${username}.github.io/${slug}/`
-      };
+      const file = document.getElementById('iconFile').files[0];
+      if (!file) return alert('请上传封面图');
 
       try {
+        const iconUrl = await uploadImage(file, slug, token);
+
+        const product = {
+          name: document.getElementById('name').value,
+          description: document.getElementById('description').value,
+          icon: iconUrl,
+          slug: slug,
+          link: `https://${username}.github.io/${slug}/`
+        };
+
         const { content: products, sha } = await fetchJSON('products.json', token);
         productsCache = products;
 
@@ -136,7 +169,7 @@
 
         alert('✅ 添加成功');
       } catch (err) {
-        alert('❌ 添加失败：' + err.message);
+        alert('❌ 添加失败：' + err);
       }
     });
 
@@ -181,7 +214,7 @@
           alert(`⚠️ 产品已删除，但仓库删除失败（状态码 ${deleteRes.status}）`);
         }
       } catch (err) {
-        alert('❌ 删除失败：' + err.message);
+        alert('❌ 删除失败：' + err);
       }
     }
   </script>
