@@ -1,5 +1,12 @@
 [
   {
+    "name": "测试2",
+    "description": "测试2",
+    "icon": "https://www.com",
+    "slug": "ceshi2",
+    "link": "https://jkjj8899.github.io/ceshi2/"
+  },
+  {
     "slug": "test-bot",
     "name": "æµè¯æºå¨äºº",
     "description": "ç¨äºæµè¯èªå¨åå»ºä»åºçæºå¨äººé¡¹ç®",
