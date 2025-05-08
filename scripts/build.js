@@ -7,6 +7,9 @@ const products = JSON.parse(fs.readFileSync('./products.json', 'utf8'));
 const header = fs.readFileSync('./components/header.html', 'utf8');
 const footer = fs.readFileSync('./components/footer.html', 'utf8');
 
+// 确保输出目录存在
+fs.mkdirSync('../product-site', { recursive: true });
+
 const cards = products.map(p => `
   <div class="product-card">
     <img src="${p.icon}" alt="${p.name}">
@@ -18,5 +21,5 @@ const cards = products.map(p => `
   </div>
 `).join('\n');
 
-fs.writeFileSync('index.html', html, header + cards + footer);
+fs.writeFileSync('../product-site/index.html', header + cards + footer);
 console.log('✅ index.html 构建成功');
