@@ -1,10 +1,22 @@
-<header>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>七点科技 · 产品展示</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
   <nav>
     <div class="logo">七点科技</div>
-    <ul>
-      <li><a href="#">产品列表</a></li>
-      <li><a href="#">关于我们</a></li>
-      <li><a href="#">联系方式</a></li>
-    </ul>
+    <div class="nav-links">
+      <a href="#">产品列表</a>
+      <a href="#">关于我们</a>
+      <a href="#">联系方式</a>
+    </div>
   </nav>
-</header>
+  <div class="search-bar">
+    <input type="text" placeholder="搜索产品..." oninput="filterProducts(this.value)">
+  </div>
+  <main>
+    <div class="product-grid">
