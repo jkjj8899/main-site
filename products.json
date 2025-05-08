@@ -1,5 +1,12 @@
 [
   {
+    "name": "测试3",
+    "description": "测试443",
+    "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/ceshi423.png",
+    "slug": "ceshi423",
+    "link": "https://jkjj8899.github.io/ceshi423/"
+  },
+  {
     "name": "测试2",
     "description": "测试44",
     "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/ceshi42.png",
