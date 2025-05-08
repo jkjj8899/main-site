@@ -18,5 +18,5 @@ const cards = products.map(p => `
   </div>
 `).join('\n');
 
-fs.writeFileSync('../product-site/index.html', header + cards + footer);
+fs.writeFileSync('index.html', html), header + cards + footer);
 console.log('✅ index.html 构建成功');
