@@ -76,11 +76,20 @@ const headers = {
       font-size: 1.2rem;
       margin: 0.5rem 0;
       color: #003366;
+      min-height: 2.6em; /* 保证名称高度一致（约2行） */
+     display: -webkit-box;
+     -webkit-line-clamp: 2;
+     -webkit-box-orient: vertical;
+     overflow: hidden;
     }
     .card-content p {
       font-size: 0.95rem;
       color: #666;
-      min-height: 38px;
+      min-height: 3.6em; /* 保证简介高度一致（约3行） */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .card-content a {
       display: inline-block;
