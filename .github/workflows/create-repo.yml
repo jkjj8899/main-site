@@ -87,10 +87,10 @@ jobs:
                 await createRepo(p.slug, p.description);
                 await pushFile(p.slug, ".product.json", JSON.stringify(p, null, 2), "init .product.json");
 
-                const readme = `# ${p.name}\n\n${p.description}\n\n👉 返回产品主站：[点击这里](https://jkjj8899.github.io/main-site/)`;
+                const readme = `# ${p.name}\n\n${p.description}\n\n👉 返回产品主站：[点击这里](https://jkjj8899.github.io/product-site/)`;
                 await pushFile(p.slug, "README.md", readme, "init README.md");
 
-                const html = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>${p.name}</title></head><body><h1>${p.name}</h1><p>${p.description}</p><p><a href='https://jkjj8899.github.io/main-site/'>返回产品列表</a></p></body></html>`;
+                const html = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>${p.name}</title></head><body><h1>${p.name}</h1><p>${p.description}</p><p><a href='https://jkjj8899.github.io/product-site/'>返回产品列表</a></p></body></html>`;
                 await pushFile(p.slug, "index.html", html, "init index.html");
 
                 await enablePages(p.slug);
