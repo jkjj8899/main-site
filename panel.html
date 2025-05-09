@@ -23,29 +23,31 @@
 
   <div id="app" style="display:none">
     <h1>七点科技产品控制台</h1>
-    <form id="add-form">
-      <h2>添加产品</h2>
-      <label>GitHub Token</label>
-      <input type="password" id="token" placeholder="你的 GitHub Token">
+<form id="add-form">
+  <h2>添加产品</h2>
+  <label>GitHub Token</label>
+  <input type="password" id="token" placeholder="你的 GitHub Token">
 
-      <label>产品名称</label>
-      <input type="text" id="name" required>
+  <label>产品名称</label>
+  <input type="text" id="name" required>
 
-      <label>产品简介</label>
-      <input type="text" id="description" required>
+  <label>产品简介</label>
+  <input type="text" id="description" required>
 
-      <label>上传封面图</label>
-      <input type="file" id="iconFile" accept="image/*" required>
+  <label>上传封面图</label>
+  <input type="file" id="iconFile" accept="image/*" required>
 
-      <label>仓库名称（slug，将用于创建仓库和生成链接）</label>
-      <input type="text" id="repo-name" placeholder="如 ai-bot-01" required>
+  <label>上传展示图（可多选）</label>
+  <input type="file" id="galleryFiles" accept="image/*" multiple>
 
-      <label>产品链接（自动填充）</label>
-      <input type="url" id="link" readonly>
+  <label>仓库名称（slug，将用于创建仓库和生成链接）</label>
+  <input type="text" id="repo-name" placeholder="如 ai-bot-01" required>
 
-      <button type="submit">添加产品</button>
-    </form>
+  <label>产品链接（自动填充）</label>
+  <input type="url" id="link" readonly>
 
+  <button type="submit">添加产品</button>
+</form>
     <div class="danger-zone">
       <h2>删除产品</h2>
       <label>仓库名称（slug）</label>
