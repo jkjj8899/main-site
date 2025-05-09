@@ -76,16 +76,16 @@ const headers = {
       font-size: 1.2rem;
       margin: 0.5rem 0;
       color: #003366;
-      min-height: 2.6em; /* 保证名称高度一致（约2行） */
-     display: -webkit-box;
-     -webkit-line-clamp: 2;
-     -webkit-box-orient: vertical;
-     overflow: hidden;
+      min-height: 2.6em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .card-content p {
       font-size: 0.95rem;
       color: #666;
-      min-height: 3.6em; /* 保证简介高度一致（约3行） */
+      min-height: 3.6em;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
@@ -109,16 +109,23 @@ const headers = {
 <body>
   <header>七点科技 · 产品目录</header>
   <div class="container">
-    ${products.map(p => `
-      <div class="card">
-        <img src="${p.icon}" alt="${p.name}" />
-        <div class="card-content">
-          <h3>${p.name}</h3>
-          <p>${p.description}</p>
-          <a href="${p.link}" target="_blank">访问产品</a>
+    ${products.map(p => {
+      const name = (p.name || '未命名产品').trim();
+      const icon = p.icon || 'https://via.placeholder.com/300x180?text=No+Image';
+      const link = p.link || '#';
+      const rawDesc = (p.description || '').replace(/[\r\n]+/g, ' ').trim();
+      const shortDesc = rawDesc.length > 100 ? rawDesc.slice(0, 100) + '...' : rawDesc;
+      return `
+        <div class="card">
+          <img src="${icon}" alt="${name}" />
+          <div class="card-content">
+            <h3>${name}</h3>
+            <p>${shortDesc}</p>
+            <a href="${link}" target="_blank">访问产品</a>
+          </div>
         </div>
-      </div>
-    `).join('')}
+      `;
+    }).join('')}
   </div>
   <footer>© 2025 七点科技 · 所有产品自动同步展示 · SEO 自动适配</footer>
 </body>
@@ -127,6 +134,7 @@ const headers = {
     fs.writeFileSync('index.html', html);
     console.log('✅ index.html 页面已生成');
   } catch (err) {
-    console.error('❌ 获取或构建失败：', err.message);
+    console.error('❌ 构建失败但不中断：', err.message);
+    fs.writeFileSync('index.html', '<h1>构建失败，请检查 products.json 格式</h1>');
   }
 })();
