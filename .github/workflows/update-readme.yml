@@ -35,15 +35,28 @@ jobs:
           };
 
           (async () => {
-            const response = await axios.get(`https://api.github.com/repos/${USERNAME}/${SOURCE_REPO}/contents/products.json`, { headers });
-            const products = JSON.parse(Buffer.from(response.data.content, 'base64').toString('utf-8'));
+            const response = await axios.get(
+              `https://api.github.com/repos/${USERNAME}/${SOURCE_REPO}/contents/products.json`,
+              { headers }
+            );
+            const products = JSON.parse(
+              Buffer.from(response.data.content, 'base64').toString('utf-8')
+            );
 
-            const tableHeader = '| 图标 | 产品名称 | 简介 | 访问页面 |\n|------|----------|------|----------|';
-            const tableRows = products.map(p =>
-              `| <img src="${p.icon}" width="48" /> | **${p.name}** | ${p.description} | [访问页面](${p.link}) |`
-            ).join('\n');
-
-            const table = `${tableHeader}\n${tableRows}`;
+            let table = '<table>\n  <tr>';
+            products.forEach((p, i) => {
+              table += `
+    <td align="center" width="50%" style="padding: 10px;">
+      <img src="${p.icon}" width="100"/><br/>
+      <b>${p.name}</b><br/>
+      <p style="max-width: 240px; margin: 0 auto;">${p.description.length > 50 ? p.description.slice(0, 50) + '...' : p.description}</p>
+      <a href="${p.link}" target="_blank">👉 访问页面</a>
+    </td>`;
+              if ((i + 1) % 2 === 0 && i !== products.length - 1) {
+                table += '\n  </tr>\n  <tr>';
+              }
+            });
+            table += '\n  </tr>\n</table>';
 
             const readme = fs.readFileSync('README.md', 'utf-8');
             const updated = readme.replace(
@@ -61,5 +74,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add README.md
-          git commit -m "自动插入产品列表" || echo "无变化"
+          git commit -m "自动更新产品卡片列表" || echo "无变化"
           git push
