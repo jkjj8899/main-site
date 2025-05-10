@@ -40,12 +40,5 @@
     "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/ceshi42.png",
     "slug": "ceshi42",
     "link": "https://jkjj8899.github.io/ceshi42/"
-  },
-  {
-    "name": "ceshi1",
-    "description": "测试",
-    "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/ceshi1.png",
-    "slug": "ceshi1",
-    "link": "https://jkjj8899.github.io/ceshi1/"
   }
 ]
