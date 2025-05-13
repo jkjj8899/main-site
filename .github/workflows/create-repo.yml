@@ -1,1 +1,102 @@
+name: 自动创建子仓库并初始化
 
+on:
+  push:
+    paths:
+      - 'products.json'
+    branches:
+      - main
+
+jobs:
+  create-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 克隆主仓库
+        uses: actions/checkout@v3
+
+      - name: 配置 Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 安装依赖
+        run: npm install axios
+
+      - name: 执行自动建仓初始化
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_USERNAME: jkjj8899  # ← 替换为你自己的用户名
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const axios = require('axios');
+
+          const GH_TOKEN = process.env.GH_TOKEN;
+          const USERNAME = process.env.GH_USERNAME;
+          const headers = {
+            Authorization: `token ${GH_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json'
+          };
+
+          const products = JSON.parse(fs.readFileSync('products.json', 'utf-8'));
+
+          async function repoExists(repo) {
+            try {
+              await axios.get(`https://api.github.com/repos/${USERNAME}/${repo}`, { headers });
+              return true;
+            } catch (err) {
+              return false;
+            }
+          }
+
+          async function createRepo(slug, description) {
+            await axios.post(`https://api.github.com/user/repos`, {
+              name: slug,
+              private: false, // ← 改为公开仓库
+              description
+            }, { headers });
+          }
+
+          async function pushFile(repo, path, content, message) {
+            const encoded = Buffer.from(content).toString('base64');
+            await axios.put(`https://api.github.com/repos/${USERNAME}/${repo}/contents/${path}`, {
+              message,
+              content: encoded,
+              branch: "main"
+            }, { headers });
+          }
+
+          async function enablePages(repo) {
+            try {
+              await axios.post(`https://api.github.com/repos/${USERNAME}/${repo}/pages`, {
+                source: {
+                  branch: "main",
+                  path: "/"
+                }
+              }, { headers });
+            } catch (e) {
+              console.error(`❌ 无法启用 Pages: ${repo}`, e.message);
+            }
+          }
+
+          (async () => {
+            for (const p of products) {
+              const exists = await repoExists(p.slug);
+              if (!exists) {
+                console.log(`🆕 创建仓库: ${p.slug}`);
+                await createRepo(p.slug, p.description);
+                await pushFile(p.slug, ".product.json", JSON.stringify(p, null, 2), "init .product.json");
+
+                const readme = `# ${p.name}\n\n${p.description}\n\n👉 返回产品主站：[点击这里](https://jkjj8899.github.io/product-site/)`;
+                await pushFile(p.slug, "README.md", readme, "init README.md");
+
+                const html = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>${p.name}</title></head><body><h1>${p.name}</h1><p>${p.description}</p><p><a href='https://jkjj8899.github.io/product-site/'>返回产品列表</a></p></body></html>`;
+                await pushFile(p.slug, "index.html", html, "init index.html");
+
+                await enablePages(p.slug);
+              } else {
+                console.log(`✅ 跳过已存在: ${p.slug}`);
+              }
+            }
+          })();
+          EOF
