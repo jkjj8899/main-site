@@ -75,7 +75,7 @@ async function enablePages(repo) {
       "<h1 id='title'>加载中...</h1><p id='desc'></p><div class='gallery' id='images'></div>" +
       "<div class='contact'><p>📬 有任何问题或合作意向，欢迎联系我们：</p>" +
       "<a href='https://t.me/sy89899' target='_blank'>👉 Telegram：@sy89899</a></div>" +
-      "<script>fetch('.product.json').then(res => res.json()).then(data => {" +
+      "<script>fetch('product.json').then(res => res.json()).then(data => {" +
       "document.getElementById('title').textContent = data.name;" +
       "document.getElementById('desc').textContent = data.description;" +
       "const container = document.getElementById('images');" +
@@ -86,7 +86,7 @@ async function enablePages(repo) {
 
     let sha;
     try {
-      const existing = await axios.get(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, { headers });
+      const existing = await axios.get(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/product.json`, { headers });
       sha = existing.data.sha;
     } catch {}
 
