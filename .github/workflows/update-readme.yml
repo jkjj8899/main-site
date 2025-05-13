@@ -21,7 +21,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT }}
           GH_USERNAME: jkjj8899
         run: |
-          node <<'EOF'
+          node <<EOF
           const axios = require('axios');
           const fs = require('fs');
 
@@ -30,25 +30,25 @@ jobs:
           const SOURCE_REPO = "main-site";
 
           const headers = {
-            Authorization: token ${GH_TOKEN},
+            Authorization: 'token ' + GH_TOKEN,
             Accept: 'application/vnd.github.v3+json'
           };
 
           (async () => {
-            const response = await axios.get(https://api.github.com/repos/${USERNAME}/${SOURCE_REPO}/contents/products.json, { headers });
-            const products = JSON.parse(Buffer.from(response.data.content, 'base64').toString('utf-8'));
+            const res = await axios.get(\`https://api.github.com/repos/\${USERNAME}/\${SOURCE_REPO}/contents/products.json\`, { headers });
+            const products = JSON.parse(Buffer.from(res.data.content, 'base64').toString('utf-8'));
 
-            const tableHeader = '| 图标 | 产品名称 | 简介 | 访问页面 |\n|------|----------|------|----------|';
+            const tableHeader = '| 图标 | 产品名称 | 简介 | 访问页面 |\\n|------|----------|------|----------|';
             const tableRows = products.map(p =>
-              | <img src="${p.icon}" width="48" /> | **${p.name}** | ${p.description} | [访问页面](${p.link}) |
-            ).join('\n');
+              \`| <img src="\${p.icon}" width="48" /> | **\${p.name}** | \${p.description} | [访问页面](\${p.link}) |\`
+            ).join('\\n');
 
-            const table = ${tableHeader}\n${tableRows};
+            const table = \`\${tableHeader}\\n\${tableRows}\`;
 
             const readme = fs.readFileSync('README.md', 'utf-8');
             const updated = readme.replace(
-              /<!-- PRODUCT_LIST_START -->[\s\S]*<!-- PRODUCT_LIST_END -->/,
-              <!-- PRODUCT_LIST_START -->\n${table}\n<!-- PRODUCT_LIST_END -->
+              /<!-- PRODUCT_LIST_START -->[\\s\\S]*<!-- PRODUCT_LIST_END -->/,
+              \`<!-- PRODUCT_LIST_START -->\\n\${table}\\n<!-- PRODUCT_LIST_END -->\`
             );
 
             fs.writeFileSync('README.md', updated);
