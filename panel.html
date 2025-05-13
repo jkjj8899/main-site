@@ -1,3 +1,5 @@
+<!-- ✅ 七点科技产品控制台（封面图上传 + 图集上传，主仓库只写封面图） -->
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -23,28 +25,32 @@
 
   <div id="app" style="display:none">
     <h1>七点科技产品控制台</h1>
-<form id="add-form">
-  <h2>添加产品</h2>
-  <label>GitHub Token</label>
-  <input type="password" id="token" placeholder="你的 GitHub Token">
+    <form id="add-form">
+      <h2>添加产品</h2>
+      <label>GitHub Token</label>
+      <input type="password" id="token" placeholder="你的 GitHub Token" required>
 
-  <label>产品名称</label>
-  <input type="text" id="name" required>
+      <label>产品名称</label>
+      <input type="text" id="name" required>
 
-  <label>产品简介</label>
-  <input type="text" id="description" required>
+      <label>产品简介</label>
+      <input type="text" id="description" required>
 
-  <label>上传产品图（支持多图）</label>
-  <input type="file" id="imageFiles" accept="image/*" multiple required>
+      <label>上传封面图（1张，仅用于卡片）</label>
+      <input type="file" id="iconFile" accept="image/*" required>
 
-  <label>仓库名称（slug，将用于创建仓库和生成链接）</label>
-  <input type="text" id="repo-name" placeholder="如 ai-bot-01" required>
+      <label>上传产品图集（用于详情页展示）</label>
+      <input type="file" id="galleryFiles" accept="image/*" multiple>
 
-  <label>产品链接（自动填充）</label>
-  <input type="url" id="link" readonly>
+      <label>仓库名称（slug）</label>
+      <input type="text" id="repo-name" placeholder="如 ai-bot-01" required>
 
-  <button type="submit">添加产品</button>
-</form>
+      <label>产品链接（自动填充）</label>
+      <input type="url" id="link" readonly>
+
+      <button type="submit">添加产品</button>
+    </form>
+
     <div class="danger-zone">
       <h2>删除产品</h2>
       <label>仓库名称（slug）</label>
@@ -93,68 +99,68 @@
       document.getElementById('link').value = `https://${username}.github.io/${slug}/`;
     });
 
-    async function uploadImages(files, slug, token) {
-      const urls = [];
+    async function uploadImage(file, path, token, message) {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          const contentBase64 = reader.result.split(',')[1];
+          const res = await fetch(`https://api.github.com/repos/${username}/${assetRepo}/contents/${path}`, {
+            method: 'PUT',
+            headers: {
+              Authorization: `token ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message, content: contentBase64 })
+          });
+          if (!res.ok) return reject(await res.text());
+          resolve(`https://raw.githubusercontent.com/${username}/${assetRepo}/main/${path}`);
+        };
+        reader.onerror = () => reject("图片读取失败");
+        reader.readAsDataURL(file);
+      });
+    }
 
+    async function uploadGallery(files, slug, token) {
       for (const file of files) {
-        const reader = new FileReader();
-        const base64 = await new Promise((resolve, reject) => {
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = () => reject("图片读取失败");
-          reader.readAsDataURL(file);
-        });
-
         const path = `assets/${slug}/${file.name}`;
-        const res = await fetch(`https://api.github.com/repos/${username}/${assetRepo}/contents/${path}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `上传产品图 ${file.name}`,
-            content: base64
-          })
-        });
-
-        if (!res.ok) throw new Error(await res.text());
-
-        urls.push(`https://raw.githubusercontent.com/${username}/${assetRepo}/main/assets/${slug}/${file.name}`);
+        await uploadImage(file, path, token, `上传图集图片 ${file.name}`);
       }
-
-      return urls;
     }
 
     document.getElementById('add-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const token = document.getElementById('token').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const description = document.getElementById('description').value.trim();
       const repoName = document.getElementById('repo-name').value.trim();
       const slug = slugify(repoName);
+      const iconFile = document.getElementById('iconFile').files[0];
+      const galleryFiles = document.getElementById('galleryFiles').files;
 
-      const files = document.getElementById('imageFiles').files;
-      if (!files.length) return alert('请上传至少一张产品图');
+      if (!iconFile) return alert('请上传封面图');
 
       try {
-        const imageUrls = await uploadImages(files, slug, token);
+        const iconUrl = await uploadImage(iconFile, `assets/${slug}.png`, token, `上传封面图 ${slug}.png`);
+        if (galleryFiles.length > 0) {
+          await uploadGallery(galleryFiles, slug, token); // ✅ 上传但不写入主仓库
+        }
 
         const product = {
-          name: document.getElementById('name').value,
-          description: document.getElementById('description').value,
-          slug: slug,
-          icon: imageUrls[0],
-          images: Array.from(imageUrls),
+          name,
+          description,
+          slug,
+          icon: iconUrl,
           link: `https://${username}.github.io/${slug}/`
         };
 
         const { content: products, sha } = await fetchJSON('products.json', token);
-
-        if (products.find(p => p.slug === product.slug)) {
+        if (products.find(p => p.slug === slug)) {
           return alert('❌ 已存在相同 slug 的产品，请更换');
         }
 
         products.unshift(product);
         const updated = btoaUtf8(JSON.stringify(products, null, 2));
-
         await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
           method: 'PUT',
           headers: {
@@ -162,7 +168,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `添加产品：${product.name}`,
+            message: `添加产品：${name}`,
             content: updated,
             sha
           })
@@ -173,50 +179,6 @@
         alert('❌ 添加失败：' + err);
       }
     });
-
-    async function deleteProduct() {
-      const slug = slugify(document.getElementById('delete-slug').value.trim());
-      const token = document.getElementById('token').value.trim();
-      if (!slug || !token) return alert('请输入仓库 slug 和 Token');
-
-      const confirmed = confirm(`⚠️ 确定要删除产品和仓库 "${slug}"？此操作不可恢复！`);
-      if (!confirmed) return;
-
-      try {
-        const { content: products, sha } = await fetchJSON('products.json', token);
-        const product = products.find(p => p.slug === slug);
-        if (!product) return alert('❌ 未找到该产品');
-
-        const updatedList = products.filter(p => p.slug !== slug);
-        const updated = btoaUtf8(JSON.stringify(updatedList, null, 2));
-
-        await fetch(`https://api.github.com/repos/${username}/${repo}/contents/products.json`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `token ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: `删除产品：${slug}`,
-            content: updated,
-            sha
-          })
-        });
-
-        const deleteRes = await fetch(`https://api.github.com/repos/${username}/${slug}`, {
-          method: 'DELETE',
-          headers: { Authorization: `token ${token}` }
-        });
-
-        if (deleteRes.status === 204) {
-          alert('✅ 删除成功，包括对应仓库');
-        } else {
-          alert(`⚠️ 产品已删除，但仓库删除失败（状态码 ${deleteRes.status}）`);
-        }
-      } catch (err) {
-        alert('❌ 删除失败：' + err);
-      }
-    }
   </script>
 </body>
 </html>
