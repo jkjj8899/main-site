@@ -1,5 +1,12 @@
 [
   {
+    "name": "全开源Java多语言跨境电商外贸商城源码 TikTok内嵌商城 带搭建教程",
+    "description": "JAVA技术栈开发  uniapp技术栈 支持多端 H5+Android+IOS  PC端：vue+elementui  用户端：uniapp  管理端：vue+elementui  后台服务：springboot+mybatisplus+mysql  功能描述：  对接国际支付，支持商家入驻，直通车  一键铺货，客服系统完善，后台下单  意见反馈，智能筛选，修改个人资料，修改收货地址。  充值提现，钱包明细，充值提现明细，支持银行卡提现  包含买家端+卖家端+代理端+后台管理端+客服端  自带产品数据  Java的东西不会部署 所以没有测试，看文件夹都是源代码 全开源的，这次的带有部署教程 免费分享给会员研究吧",
+    "slug": "sha123",
+    "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/sha123.png",
+    "link": "https://jkjj8899.github.io/sha123/"
+  },
+  {
     "name": "【亲测】51111最新海外USDT投资理财系统源码",
     "description": "测试环境：Linux系统CentOS7.6、宝塔面板、Nginx、PHP8.1、MySQL5.7，运行目录public，伪静态选择laravel5，建议开启SSL  如果找不到数据库修改直接添加数据库账号密码用户名都是 cse224",
     "slug": "licai2233345",
