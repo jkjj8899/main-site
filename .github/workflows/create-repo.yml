@@ -83,98 +83,40 @@ async function enablePages(repo) {
   for (const p of products) {
     const exists = await repoExists(p.slug);
     if (!exists) {
-      console.log(`🆕 创建仓库: ${p.slug}`);
-      await createRepo(p.slug, p.description);
+  console.log(`🆕 创建仓库: ${p.slug}`);
+  await createRepo(p.slug, p.description);
+} else {
+  console.log(`♻️ 仓库已存在，继续更新: ${p.slug}`);
+}
 
-      // ✅ 获取图集文件列表
-      let images = [];
-      try {
-        const res = await axios.get(`https://api.github.com/repos/${USERNAME}/product-site/contents/assets/${p.slug}`, { headers });
-        images = res.data
-          .filter(item => item.type === 'file' && /\.(jpe?g|png|webp|gif)$/i.test(item.name))
-          .map(item => `https://raw.githubusercontent.com/${USERNAME}/product-site/main/assets/${p.slug}/${item.name}`);
-        console.log(`📸 读取图集 ${images.length} 张 for ${p.slug}`);
-      } catch (e) {
-        console.warn(`⚠️ 图集读取失败: ${p.slug}`, e.message);
-      }
+// ✅ 获取图集文件列表
+let images = [];
+try {
+  const res = await axios.get(`https://api.github.com/repos/${USERNAME}/product-site/contents/assets/${p.slug}`, { headers });
+  images = res.data
+    .filter(item => item.type === 'file' && /\.(jpe?g|png|webp|gif)$/i.test(item.name))
+    .map(item => `https://raw.githubusercontent.com/${USERNAME}/product-site/main/assets/${p.slug}/${item.name}`);
+  console.log(`📸 读取图集 ${images.length} 张 for ${p.slug}`);
+} catch (e) {
+  console.warn(`⚠️ 图集读取失败: ${p.slug}`, e.message);
+}
 
-      // ✅ 写入包含 images 的 .product.json
-      const productJson = {
-        name: p.name,
-        description: p.description,
-        slug: p.slug,
-        icon: p.icon,
-        link: p.link,
-        images: images || []
-      };
+// ✅ 写入包含 images 的 .product.json
+const productJson = {
+  name: p.name,
+  description: p.description,
+  slug: p.slug,
+  icon: p.icon,
+  link: p.link,
+  images: images || []
+};
 
-      console.log("➡️ 即将写入 .product.json:", JSON.stringify(productJson, null, 2));
-      await pushFile(p.slug, ".product.json", JSON.stringify(productJson, null, 2), "init .product.json");
-
-      const html = `<!DOCTYPE html>
-<html lang="zh">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${p.name}</title>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; max-width: 800px; margin: auto; background: #f9f9f9; }
-    h1 { color: #222; }
-    p { color: #555; }
-    .gallery { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; }
-    .gallery img { width: 100%; max-width: 240px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .nav { margin-bottom: 1.5rem; }
-    .nav a { text-decoration: none; color: #003366; }
-    .contact {
-      margin-top: 2rem;
-      padding: 1rem;
-      background: #eef3f8;
-      border-radius: 8px;
-      font-size: 0.95rem;
-    }
-    .contact a { color: #0b66c3; text-decoration: none; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div class="nav">
-    <a href="https://jkjj8899.github.io/product-site/">← 返回产品列表</a>
-  </div>
-
-  <h1 id="title">加载中...</h1>
-  <p id="desc"></p>
-  <div class="gallery" id="images"></div>
-
-  <div class="contact">
-    <p>📬 有任何问题或合作意向，欢迎联系我们：</p>
-    <a href="https://t.me/sy89899" target="_blank">👉 Telegram：@sy89899</a>
-  </div>
-
-  <script>
-    fetch('.product.json')
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('title').textContent = data.name;
-        document.getElementById('desc').textContent = data.description;
-        const container = document.getElementById('images');
-        (data.images || []).forEach(url => {
-          const img = document.createElement('img');
-          img.src = url;
-          img.alt = data.name;
-          container.appendChild(img);
-        });
-      })
-      .catch(err => {
-        document.body.innerHTML = '<p style="color:red;">加载失败，请检查 .product.json 文件是否存在</p>';
-      });
-  </script>
-</body>
-</html>`;
-
-      await pushFile(p.slug, "index.html", html, "init index.html");
-      await enablePages(p.slug);
-    } else {
-      console.log(`✅ 跳过已存在: ${p.slug}`);
+console.log("➡️ 即将写入 .product.json:", JSON.stringify(productJson, null, 2));
+await pushFile(p.slug, ".product.json", JSON.stringify(productJson, null, 2), "init .product.json");
+await pushFile(p.slug, "index.html", html, "init index.html");
+await enablePages(p.slug);`);
     }
   }
 })();
+
           EOF
