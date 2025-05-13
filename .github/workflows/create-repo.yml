@@ -105,9 +105,10 @@ async function enablePages(repo) {
         slug: p.slug,
         icon: p.icon,
         link: p.link,
-        images
+        images: images || []
       };
 
+      console.log("➡️ 即将写入 .product.json:", JSON.stringify(productJson, null, 2));
       await pushFile(p.slug, ".product.json", JSON.stringify(productJson, null, 2), "init .product.json");
 
       const html = `<!DOCTYPE html>
@@ -167,8 +168,7 @@ async function enablePages(repo) {
       });
   </script>
 </body>
-</html>
-`;
+</html>`;
 
       await pushFile(p.slug, "index.html", html, "init index.html");
       await enablePages(p.slug);
@@ -177,6 +177,4 @@ async function enablePages(repo) {
     }
   }
 })();
-
-
           EOF
