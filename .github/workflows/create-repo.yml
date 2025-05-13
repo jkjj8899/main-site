@@ -112,7 +112,22 @@ const productJson = {
 };
 
 console.log("➡️ 即将写入 .product.json:", JSON.stringify(productJson, null, 2));
-await pushFile(p.slug, ".product.json", JSON.stringify(productJson, null, 2), "init .product.json");
+// 🔁 获取已有 .product.json 的 sha，如果存在就更新
+let sha = undefined;
+try {
+  const existing = await axios.get(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, { headers });
+  sha = existing.data.sha;
+  console.log(`✏️ 发现旧的 .product.json，准备覆盖: ${sha}`);
+} catch (e) {
+  console.log(`🆕 该仓库无 .product.json，准备创建新文件`);
+}
+
+await axios.put(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, {
+  message: "更新 .product.json",
+  content: Buffer.from(JSON.stringify(productJson, null, 2)).toString("base64"),
+  branch: "main",
+  ...(sha && { sha })
+}, { headers });
 await pushFile(p.slug, "index.html", html, "init index.html");
 await enablePages(p.slug);`);
     }
