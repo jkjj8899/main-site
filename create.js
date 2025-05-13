@@ -90,8 +90,8 @@ async function enablePages(repo) {
       sha = existing.data.sha;
     } catch {}
 
-    await axios.put(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, {
-      message: "更新 .product.json",
+    await axios.put(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/product.json`, {
+      message: "更新 product.json",
       content: Buffer.from(JSON.stringify(productJson, null, 2)).toString("base64"),
       branch: "main",
       ...(sha && { sha })
