@@ -25,7 +25,7 @@ jobs:
       - name: 执行自动建仓初始化
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
-          GH_USERNAME: jkjj8899  # ← 替换为你自己的用户名
+          GH_USERNAME: jkjj8899
         run: |
           node <<'EOF'
 const fs = require('fs');
@@ -44,7 +44,7 @@ async function repoExists(repo) {
   try {
     await axios.get(`https://api.github.com/repos/${USERNAME}/${repo}`, { headers });
     return true;
-  } catch (err) {
+  } catch {
     return false;
   }
 }
@@ -83,38 +83,15 @@ async function enablePages(repo) {
   for (const p of products) {
     const exists = await repoExists(p.slug);
     if (!exists) {
-  console.log(`🆕 创建仓库: ${p.slug}`);
-  await createRepo(p.slug, p.description);
-} else {
-  console.log(`♻️ 仓库已存在，继续更新: ${p.slug}`);
-}
+      console.log(`🆕 创建仓库: ${p.slug}`);
+      await createRepo(p.slug, p.description);
+    } else {
+      console.log(`♻️ 仓库已存在: ${p.slug}`);
+    }
 
-// ✅ 获取图集文件列表
-let images = [];
-try {
-  const res = await axios.get(`https://api.github.com/repos/${USERNAME}/product-site/contents/assets/${p.slug}`, { headers });
-  images = res.data
-    .filter(item => item.type === 'file' && /\.(jpe?g|png|webp|gif)$/i.test(item.name))
-    .map(item => `https://raw.githubusercontent.com/${USERNAME}/product-site/main/assets/${p.slug}/${item.name}`);
-  console.log(`📸 读取图集 ${images.length} 张 for ${p.slug}`);
-} catch (e) {
-  console.warn(`⚠️ 图集读取失败: ${p.slug}`, e.message);
-}
+    const productJson = { ...p };  // ✅ 直接复用 products.json 字段
 
-// ✅ 写入包含 images 的 .product.json
-const productJson = {
-  name: p.name,
-  description: p.description,
-  slug: p.slug,
-  icon: p.icon,
-  link: p.link,
-  images: images || []
-};
-
-console.log("➡️ 即将写入 .product.json:", JSON.stringify(productJson, null, 2));
-
-// ✅ 构造 HTML 页面内容
-const html = `<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
@@ -169,25 +146,26 @@ const html = `<!DOCTYPE html>
   </script>
 </body>
 </html>`;
-// 🔁 获取已有 .product.json 的 sha，如果存在就更新
-let sha = undefined;
-try {
-  const existing = await axios.get(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, { headers });
-  sha = existing.data.sha;
-  console.log(`✏️ 发现旧的 .product.json，准备覆盖: ${sha}`);
-} catch (e) {
-  console.log(`🆕 该仓库无 .product.json，准备创建新文件`);
-}
 
-await axios.put(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, {
-  message: "更新 .product.json",
-  content: Buffer.from(JSON.stringify(productJson, null, 2)).toString("base64"),
-  branch: "main",
-  ...(sha && { sha })
-}, { headers });
-await pushFile(p.slug, "index.html", html, "init index.html");
-await enablePages(p.slug);`);
-    }
+    // 写入 .product.json
+    let sha = undefined;
+    try {
+      const existing = await axios.get(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, { headers });
+      sha = existing.data.sha;
+    } catch {}
+
+    await axios.put(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, {
+      message: "更新 .product.json",
+      content: Buffer.from(JSON.stringify(productJson, null, 2)).toString("base64"),
+      branch: "main",
+      ...(sha && { sha })
+    }, { headers });
+
+    // 写入 index.html
+    await pushFile(p.slug, "index.html", html, "init index.html");
+
+    // 启用 GitHub Pages
+    await enablePages(p.slug);
   }
 })();
-          EOF
+EOF
