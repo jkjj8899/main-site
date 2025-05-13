@@ -147,7 +147,6 @@ jobs:
 </body>
 </html>`;
 
-                // 写入 .product.json（带 sha 逻辑）
                 let sha;
                 try {
                   const existing = await axios.get(`https://api.github.com/repos/${USERNAME}/${p.slug}/contents/.product.json`, { headers });
