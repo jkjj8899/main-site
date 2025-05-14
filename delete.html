@@ -46,7 +46,7 @@
       if (!token) return alert("请输入 GitHub Token");
       const headers = { Authorization: `token ${token}` };
       try {
-        const res = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`, { headers });
+        const res = await fetch(`https://api.github.com/user/repos?per_page=100&affiliation=owner,collaborator`, { headers });
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
         allRepos = data.filter(r => !r.fork && !r.archived && r.name !== `${username.toLowerCase()}.github.io`);
