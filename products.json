@@ -84,13 +84,6 @@
     "link": "https://jkjj8899.github.io/licai223/"
   },
   {
-    "name": "【亲测】最新海外USDT投资理财系统源码",
-    "description": "测试环境：Linux系统CentOS7.6、宝塔面板、Nginx、PHP8.1、MySQL5.7，运行目录public，伪静态选择laravel5，建议开启SSL  如果找不到数据库修改直接添加数据库账号密码用户名都是 cse224",
-    "slug": "licai22",
-    "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/licai22.png",
-    "link": "https://jkjj8899.github.io/licai22/"
-  },
-  {
     "name": "A1626 最新多语言MyOkex海外交易所系统源码 币币秒合约 永续 闪兑 k线插针 附教程",
     "description": "测试环境：Linux系统CentOS7.6、宝塔面板、Nginx、PHP7.3、MySQL5.7，运行目录public，伪静态选择laravel5，建议开启SSL  语言：10种，看图  非常精美的一套交易所，前后端都是开源的，只测试了手机端，还有一个pc端没测试，也是能正常跑的，给广大终身会员的福利！！  搭建也比较简单，自带有简单的搭建教程，可能有个别功能用不了或者需要修复，但是测试下来整体都不错，k线这些都正常，可以做前后端分离  api用的是第三方接口，也可以搭建自己的api，源码也放在一起的，Java的源码（不会搞的就不用管了，已经对接好了第三方的api）",
     "slug": "shandui",
