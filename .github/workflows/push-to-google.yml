@@ -23,7 +23,7 @@ jobs:
 
       - name: 生成密钥文件
         run: |
-          echo "${{ secrets.GOOGLE_INDEXING_KEY }}" > key.json
+          echo '${{ secrets.GOOGLE_INDEXING_KEY }}' > key.json
 
       - name: 执行推送脚本
         run: |
