@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>子仓库删除控制台</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 2rem; max-width: 800px; margin: auto; }
+    h1 { text-align: center; color: #003366; }
+    .token-box, .repo-list, .footer { background: white; padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    label { font-weight: bold; display: block; margin-bottom: 0.5rem; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
+    button { padding: 0.5rem 1rem; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
+    .repo-entry { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+    .repo-entry:last-child { border: none; }
+    .repo-entry input { margin-right: 0.5rem; }
+    .danger { background: darkred; }
+    .checkbox { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>🗑️ 子仓库删除控制台</h1>
+  <div class="token-box">
+    <label for="token">GitHub Token</label>
+    <input type="password" id="token" placeholder="粘贴你的 GitHub Token...">
+    <button onclick="loadRepos()">加载子仓库列表</button>
+  </div>
+
+  <div class="repo-list" id="repo-list" style="display:none">
+    <h2>子仓库列表</h2>
+    <div class="checkbox">
+      <label><input type="checkbox" id="syncRemove"> 同时从 products.json 中移除</label>
+    </div>
+    <div id="repos"></div>
+    <div class="footer">
+      <button class="danger" onclick="deleteSelectedRepos()">删除选中的仓库</button>
+    </div>
+  </div>
+
+  <script>
+    const username = "jkjj8899";
+    let allRepos = [];
+
+    async function loadRepos() {
+      const token = document.getElementById("token").value.trim();
+      if (!token) return alert("请输入 GitHub Token");
+      const headers = { Authorization: `token ${token}` };
+      try {
+        const res = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`, { headers });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        allRepos = data.filter(r => !r.fork && !r.archived && r.name !== `${username.toLowerCase()}.github.io`);
+        const list = document.getElementById("repos");
+        list.innerHTML = "";
+        allRepos.forEach(repo => {
+          const div = document.createElement("div");
+          div.className = "repo-entry";
+          div.innerHTML = `<label><input type='checkbox' value='${repo.name}'> ${repo.name}</label><span>${repo.description || "无描述"}</span>`;
+          list.appendChild(div);
+        });
+        document.getElementById("repo-list").style.display = 'block';
+      } catch (err) {
+        alert("获取仓库失败：" + err);
+      }
+    }
+
+    async function deleteSelectedRepos() {
+      const token = document.getElementById("token").value.trim();
+      const headers = { Authorization: `token ${token}` };
+      const syncRemove = document.getElementById("syncRemove").checked;
+      const selected = Array.from(document.querySelectorAll("input[type='checkbox']:checked"))
+                            .map(el => el.value);
+      if (!selected.length) return alert("请至少选择一个仓库");
+      if (!confirm(`⚠️ 你确定要删除这些仓库吗？\n${selected.join('\n')}`)) return;
+
+      for (const name of selected) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/${username}/${name}`, {
+            method: 'DELETE', headers
+          });
+          if (res.status === 204) {
+            console.log(`✅ 已删除 ${name}`);
+            if (syncRemove) removeFromProducts(name, token);
+          } else {
+            console.warn(`❌ 删除失败 ${name}`);
+          }
+        } catch (e) {
+          console.error(`异常 ${name}:`, e);
+        }
+      }
+      alert("✅ 操作完成，请刷新查看剩余仓库");
+    }
+
+    async function removeFromProducts(slug, token) {
+      const headers = { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' };
+      try {
+        const res = await fetch(`https://api.github.com/repos/${username}/main-site/contents/products.json`, { headers });
+        const { content, sha } = await res.json();
+        const products = JSON.parse(atob(content));
+        const updated = products.filter(p => p.slug !== slug);
+        await fetch(`https://api.github.com/repos/${username}/main-site/contents/products.json`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            message: `从 products.json 删除：${slug}`,
+            content: btoa(JSON.stringify(updated, null, 2)),
+            sha
+          })
+        });
+        console.log(`📦 同步删除 ${slug} 成功`);
+      } catch (e) {
+        console.error(`同步删除 ${slug} 失败：`, e);
+      }
+    }
+  </script>
+</body>
+</html>
