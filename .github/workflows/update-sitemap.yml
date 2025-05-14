@@ -18,10 +18,19 @@ jobs:
         run: pip install requests
 
       - name: 下载生成脚本
-        run: curl -o gen_sitemap.py https://raw.githubusercontent.com/jkjj8899/main-site/main/scripts/gen_sitemap.py
+        run: |
+          curl -o gen_sitemap.py https://raw.githubusercontent.com/jkjj8899/main-site/main/scripts/gen_sitemap.py
 
       - name: 执行生成脚本
-        run: python gen_sitemap.py
+        run: |
+          python gen_sitemap.py
+          ls -al
+
+      - name: 上传 sitemap.xml
+        uses: actions/upload-artifact@v3
+        with:
+          name: sitemap
+          path: sitemap.xml
 
   deploy:
     runs-on: ubuntu-latest
@@ -32,7 +41,15 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj8899.github.io.git site
-          mv sitemap.xml site/
+
+      - name: 下载生成结果
+        uses: actions/download-artifact@v3
+        with:
+          name: sitemap
+          path: site
+
+      - name: 推送 sitemap.xml
+        run: |
           cd site
           git add sitemap.xml
           git commit -m "更新 sitemap.xml" || echo "No changes to commit"
