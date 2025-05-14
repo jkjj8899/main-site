@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  update-sitemap:
+  generate:
     runs-on: ubuntu-latest
     steps:
       - name: 克隆主仓库
@@ -17,41 +17,23 @@ jobs:
       - name: 安装依赖
         run: pip install requests
 
-      - name: 生成 sitemap.xml
-        run: |
-          python <<EOF
-import json, requests
-from datetime import datetime
+      - name: 下载生成脚本
+        run: curl -o gen_sitemap.py https://raw.githubusercontent.com/jkjj8899/main-site/main/scripts/gen_sitemap.py
 
-products = requests.get(
-  'https://raw.githubusercontent.com/jkjj8899/main-site/main/products.json'
-).json()
+      - name: 执行生成脚本
+        run: python gen_sitemap.py
 
-urls = "\n".join([
-  f"""  <url>
-    <loc>{p['link']}</loc>
-    <lastmod>{datetime.utcnow().date()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>""" for p in products
-])
-
-xml = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-{urls}
-</urlset>"""
-
-with open('sitemap.xml', 'w') as f:
-    f.write(xml)
-EOF
-
-      - name: 推送 sitemap.xml 到 jkjj8899.github.io
+  deploy:
+    runs-on: ubuntu-latest
+    needs: generate
+    steps:
+      - name: 克隆 jkjj8899.github.io
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj8899.github.io.git temp-dir
-          mv sitemap.xml temp-dir/
-          cd temp-dir
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj8899.github.io.git site
+          mv sitemap.xml site/
+          cd site
           git add sitemap.xml
           git commit -m "更新 sitemap.xml" || echo "No changes to commit"
           git push origin main
