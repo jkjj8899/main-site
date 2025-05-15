@@ -2,20 +2,6 @@
   {
     "name": "亲测ATGroup多语言海外任务抢单商城系统源码 刷单投资理财 附教程",
     "description": "测试环境：Linux系统CentOS7.6、宝塔、PHP7.3、MySQL5.6，根目录public，伪静态laravel5，开启ssl证书  语言：中文简体、英文  程序有点大，1个G左右，主要是图片资源比较多，我也没清理，是之前别人运营时留下的图片  前端是编译后的 二开不了了 测试出来的BUG有 图片上传有问题 自行研究解决",
-    "slug": "cxcx12",
-    "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx12.png",
-    "link": "https://jkjj8899.github.io/cxcx12/",
-    "images": [
-      "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx12/photo_2023-12-29_13-48-26.jpg",
-      "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx12/photo_2023-12-29_13-48-41.jpg",
-      "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx12/photo_2023-12-29_13-49-15.jpg",
-      "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx12/photo_2023-12-29_13-49-22.jpg",
-      "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx12/photo_2023-12-29_13-50-05.jpg"
-    ]
-  },
-  {
-    "name": "亲测ATGroup多语言海外任务抢单商城系统源码 刷单投资理财 附教程",
-    "description": "测试环境：Linux系统CentOS7.6、宝塔、PHP7.3、MySQL5.6，根目录public，伪静态laravel5，开启ssl证书  语言：中文简体、英文  程序有点大，1个G左右，主要是图片资源比较多，我也没清理，是之前别人运营时留下的图片  前端是编译后的 二开不了了 测试出来的BUG有 图片上传有问题 自行研究解决",
     "slug": "cxcx1",
     "icon": "https://raw.githubusercontent.com/jkjj8899/product-site/main/assets/cxcx1.png",
     "link": "https://jkjj8899.github.io/cxcx1/",
