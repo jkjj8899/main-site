@@ -16,7 +16,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj.github.io.git site
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj8899.github.io.git site
 
       - name: 下载 sitemap 生成脚本
         run: |
