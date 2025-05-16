@@ -16,7 +16,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj8899.github.io.git site
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/jkjj8899/jkjj.github.io.git site
 
       - name: 下载 sitemap 生成脚本
         run: |
@@ -37,3 +37,13 @@ jobs:
           git add sitemap.xml
           git commit -m "自动更新 sitemap.xml" || echo "No changes"
           git push origin main
+
+      - name: 上传 sitemap.xml 到 GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "sitemap.xml"
+          tag: sitemap-latest
+          name: "Latest Sitemap"
+          body: "Auto-generated sitemap.xml for SEO"
+          allowUpdates: true
+          token: ${{ secrets.GH_PAT }}
