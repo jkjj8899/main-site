@@ -38,6 +38,9 @@ jobs:
           git commit -m "自动更新 sitemap.xml" || echo "No changes"
           git push origin main
 
+      - name: 复制 sitemap.xml 回工作目录（用于发布）  # ⬅️ 添加这个步骤
+        run: cp site/sitemap.xml sitemap.xml
+
       - name: 上传 sitemap.xml 到 GitHub Release
         uses: ncipollo/release-action@v1
         with:
