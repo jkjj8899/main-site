@@ -27,7 +27,7 @@ const headers = {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="七点科技 - 产品展示页，AI、Web3、交易系统等合集" />
   <meta name="keywords" content="七点科技, AI系统, 交易所, 区块链产品, Web3, 产品列表" />
-  <title>七点科技产品目录</title>
+  <title>数字货币交易平台系统大全｜全模块源码部署｜七点科技</title>
   <style>
     body {
       margin: 0;
@@ -107,7 +107,7 @@ const headers = {
   </style>
 </head>
 <body>
-  <header>七点科技 · 产品目录</header>
+  <header>数字货币交易平台, 交易系统源码, 秒合约系统, AI交易, 跨境商城系统, 私有部署, 白标交易所, 区块链系统开发</header>
   <div class="container">
     ${products.map(p => {
       const name = (p.name || '未命名产品').trim();
@@ -127,7 +127,10 @@ const headers = {
       `;
     }).join('')}
   </div>
-  <footer>© 2025 七点科技 · 所有产品自动同步展示 · SEO 自动适配</footer>
+  <footer>© 2025 <p>
+七点科技提供全套数字货币交易所系统解决方案，覆盖币币撮合、AI 智能交易、秒合约、ETF 系统、跨境商城、多语言钱包与风控后台。支持源码部署、私有化上线与白标品牌定制，适用于搭建专业数字资产交易平台。
+</p>
+</footer>
 </body>
 </html>`;
 
